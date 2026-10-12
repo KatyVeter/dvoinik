@@ -1,0 +1,58 @@
+name: Автопостинг в Instagram
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # каждые 15 минут: публикация роликов, которым пришло время
+    - cron: '30 3 * * *'     # раз в сутки: статистика, лучшее время, подсказки «что снять»
+  workflow_dispatch:
+    inputs:
+      task:
+        description: Что сделать
+        type: choice
+        options: [publish, analyze]
+        default: publish
+
+permissions:
+  contents: write
+
+concurrency:
+  group: autopost
+  cancel-in-progress: false
+
+jobs:
+  robot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TASK: ${{ inputs.task || (github.event.schedule == '30 3 * * *' && 'analyze' || 'publish') }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Библиотека нейросети (нужна только для анализа)
+        if: env.TASK == 'analyze'
+        working-directory: autopost
+        run: npm install --omit=dev --no-audit --no-fund
+
+      - name: Робот
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node autopost/robot.mjs "$TASK"
+
+      - name: Сохранить изменения очереди и статистики
+        run: |
+          git add autopost/queue.json autopost/data 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "Изменений нет."
+            exit 0
+          fi
+          git config user.name "dvoinik-robot"
+          git config user.email "dvoinik-robot@users.noreply.github.com"
+          git commit -m "Робот: обновил очередь и статистику"
+          git pull --rebase
+          git push

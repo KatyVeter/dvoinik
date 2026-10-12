@@ -1,0 +1,8 @@
+{
+  "name": "dvoinik-autopost",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@anthropic-ai/sdk": "latest"
+  }
+}

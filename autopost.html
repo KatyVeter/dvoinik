@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Автопостинг — Двойник</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #000; --panel: #0b0b0c; --line: rgba(255,255,255,.1); --text: #f4f4f2; --muted: #8b8b8b; --ghost: #2a2a2b; --accent: #2f6bff; --ok: #3fb46b; --bad: #ff6b6b; --warn: #e0a52b; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: "Inter Tight", system-ui, sans-serif; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-underline-offset: 3px; }
+  .page { max-width: 1120px; margin: 0 auto; padding: 0 24px 96px; }
+  .top { display: flex; align-items: center; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .logo { font-size: 18px; font-weight: 500; letter-spacing: -.02em; display: flex; align-items: center; gap: 8px; }
+  .logo i { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); }
+  .logo span { color: var(--muted); font-weight: 400; }
+  .top .sp { flex: 1; }
+  .top a { font-size: 14px; color: var(--muted); }
+  .top a:hover { color: var(--text); }
+  h1 { font-size: clamp(38px, 6vw, 76px); font-weight: 400; line-height: .95; letter-spacing: -.05em; padding: 56px 0 14px; }
+  h1 em { font-style: normal; color: var(--ghost); }
+  .lead { color: var(--muted); max-width: 620px; margin-bottom: 40px; }
+  section { padding: 44px 0; border-top: 1px solid var(--line); }
+  h2 { font-size: clamp(24px, 3.2vw, 36px); font-weight: 400; letter-spacing: -.04em; margin-bottom: 6px; }
+  .sub { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+  .empty { border: 1px dashed #333; border-radius: 14px; padding: 28px 24px; color: var(--muted); font-size: 15px; }
+  .row { display: grid; grid-template-columns: 150px 1fr auto; gap: 16px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .row .when { font-size: 14px; color: var(--muted); }
+  .row .what { font-size: 16px; overflow-wrap: anywhere; }
+  .row .what small { display: block; color: var(--muted); font-size: 13px; margin-top: 3px; }
+  .st { font-size: 12px; padding: 4px 10px; border-radius: 100px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+  .st.ok { color: #7fdba3; border-color: rgba(63,180,107,.4); } .st.bad { color: var(--bad); border-color: rgba(255,107,107,.4); } .st.now { color: #9dbbff; border-color: rgba(47,107,255,.5); }
+  .slots { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; }
+  .slot { border: 1px solid rgba(47,107,255,.5); border-radius: 14px; padding: 18px 26px; font-size: 34px; letter-spacing: -.04em; background: linear-gradient(160deg, #080f1f, #050505 60%); }
+  .hours { display: grid; grid-template-columns: repeat(24, 1fr); gap: 3px; align-items: end; height: 110px; }
+  .hours div { background: #1d1d1e; border-radius: 3px 3px 0 0; min-height: 2px; }
+  .hours div.top { background: var(--accent); }
+  .hl { display: grid; grid-template-columns: repeat(24, 1fr); gap: 3px; font-size: 10px; color: var(--muted); text-align: center; margin-top: 6px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+  .card { border: 1px solid var(--line); border-radius: 14px; padding: 22px; background: var(--panel); display: grid; gap: 10px; align-content: start; }
+  .card .fmt { font-size: 12px; color: #9dbbff; }
+  .card h3 { font-size: 20px; font-weight: 400; letter-spacing: -.025em; line-height: 1.15; }
+  .card .hook { font-size: 15px; color: #d6d6d6; }
+  .card .why { font-size: 13.5px; color: var(--muted); }
+  .card .num { font-size: 13px; color: var(--muted); }
+  .card ul { list-style: none; display: grid; gap: 8px; }
+  .card li { font-size: 13.5px; color: #cfcfcf; border-top: 1px solid var(--line); padding-top: 8px; overflow-wrap: anywhere; }
+  .card li small { color: var(--muted); display: block; margin-top: 2px; }
+  .summary { font-size: 18px; max-width: 760px; margin-bottom: 22px; letter-spacing: -.01em; }
+  @media (max-width: 720px) { .row { grid-template-columns: 1fr; gap: 6px; } .row .st { justify-self: start; } .page { padding: 0 16px 72px; } .hl span:nth-child(odd) { visibility: hidden; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <div class="logo"><i></i>двойник <span>автопостинг</span></div>
+    <div class="sp"></div>
+    <a href="admin.html">Заявки</a>
+    <a href="index.html">На сайт</a>
+  </header>
+
+  <h1>Робот выкладывает. <em>Вы — нет.</em></h1>
+  <p class="lead">Здесь видно, что стоит в очереди на публикацию в Instagram, какое время робот считает лучшим, что происходит у конкурентов и что стоит снять дальше. Страница только показывает — управляется всё файлами в папке <b>autopost</b>.</p>
+
+  <section>
+    <h2>Очередь публикаций</h2>
+    <p class="sub" id="q-sub"></p>
+    <div id="queue"></div>
+  </section>
+
+  <section>
+    <h2>Лучшее время</h2>
+    <p class="sub" id="t-sub"></p>
+    <div id="times"></div>
+  </section>
+
+  <section>
+    <h2>Что снять дальше</h2>
+    <p class="sub" id="i-sub"></p>
+    <div id="ideas"></div>
+  </section>
+
+  <section>
+    <h2>Конкуренты</h2>
+    <p class="sub" id="c-sub"></p>
+    <div id="comp"></div>
+  </section>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const load = async (url) => { try { const r = await fetch(url, { cache: 'no-store' }); return r.ok ? await r.json() : null; } catch { return null; } };
+  const when = (iso) => iso ? new Date(iso).toLocaleString('ru-RU', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : '';
+  const empty = (box, text) => box.replaceChildren(el('div', 'empty', text));
+  // ссылки показываем кликабельными только если это действительно instagram.com
+  const igLink = (url, text) => {
+    try { const u = new URL(url); if (u.protocol === 'https:' && /(^|\.)instagram\.com$/.test(u.hostname)) { const a = el('a', '', text); a.href = u.href; a.target = '_blank'; a.rel = 'noopener noreferrer'; return a; } } catch {}
+    return null;
+  };
+
+  (async () => {
+    const [queue, times, ideas, comp] = await Promise.all([
+      load('autopost/queue.json'), load('autopost/data/best-times.json'),
+      load('autopost/data/ideas.json'), load('autopost/data/competitors.json')
+    ]);
+
+    // очередь
+    const STATUS = { queued: ['В очереди', 'now'], published: ['Опубликован', 'ok'], failed: ['Ошибка', 'bad'] };
+    if (!queue || !queue.length) {
+      $('q-sub').textContent = 'Роликов в очереди нет.';
+      empty($('queue'), 'Положите ролик в папку autopost/videos и добавьте запись в autopost/queue.json — он появится здесь. Как это сделать, написано в файле «КАК-ПОЛЬЗОВАТЬСЯ.txt».');
+    } else {
+      const left = queue.filter((p) => p.status === 'queued').length;
+      $('q-sub').textContent = 'Ждут публикации: ' + left + ' · всего в списке: ' + queue.length;
+      $('queue').replaceChildren(...queue.map((p) => {
+        const row = el('div', 'row');
+        const t = p.status === 'published' ? when(p.published_at) : (p.publish_at === 'auto' ? 'время подберёт робот' : p.publish_at + (p.auto ? ' · выбрал робот' : ''));
+        const what = el('div', 'what', p.caption || p.video);
+        what.append(el('small', '', p.video + (p.last_error ? ' · ' + p.last_error : '')));
+        const link = p.permalink && igLink(p.permalink, 'Открыть в Instagram');
+        if (link) { const s = el('small'); s.append(link); what.append(s); }
+        const [label, cls] = STATUS[p.status] || [p.status || '—', ''];
+        row.append(el('div', 'when', t), what, el('span', 'st ' + cls, label));
+        return row;
+      }));
+    }
+
+    // лучшее время
+    if (!times) {
+      $('t-sub').textContent = 'Робот ещё не собирал статистику.';
+      empty($('times'), 'Когда подключится Instagram, робот раз в сутки будет смотреть, в какие часы ролики — ваши и конкурентов — набирают больше всего реакций, и ставить публикации на это время. Пока используется время по умолчанию: 18:00, 12:00, 20:00.');
+    } else {
+      $('t-sub').textContent = times.note + ' Обновлено ' + when(times.updated_at) + ' · по ' + (times.based_on?.own_posts || 0) + ' вашим и ' + (times.based_on?.competitor_posts || 0) + ' чужим публикациям · пояс ' + times.timezone;
+      const slots = el('div', 'slots'); (times.slots || []).forEach((s) => slots.append(el('div', 'slot', s)));
+      const max = Math.max(...(times.by_hour || []).map((h) => h.score), 0.01);
+      const bars = el('div', 'hours'), labels = el('div', 'hl');
+      (times.by_hour || []).forEach((h) => {
+        const b = el('div', (times.slots || []).includes(String(h.hour).padStart(2, '0') + ':00') ? 'top' : '');
+        b.style.height = Math.round(h.score / max * 100) + '%';
+        b.title = h.hour + ':00 — ' + h.posts + ' публикаций';
+        bars.append(b); labels.append(el('span', '', String(h.hour)));
+      });
+      $('times').replaceChildren(slots, bars, labels);
+    }
+
+    // подсказки
+    if (!ideas || !ideas.ideas?.length) {
+      $('i-sub').textContent = 'Подсказок пока нет.';
+      empty($('ideas'), 'Когда подключатся Instagram и нейросеть, здесь каждый день будут появляться темы роликов с объяснением, почему они должны зайти — на основе того, что сработало у вас и у конкурентов.');
+    } else {
+      $('i-sub').textContent = 'Обновлено ' + when(ideas.updated_at) + ' · подсказывает нейросеть по собранной статистике';
+      const cards = el('div', 'cards');
+      ideas.ideas.forEach((i) => {
+        const c = el('article', 'card');
+        c.append(el('span', 'fmt', i.format), el('h3', '', i.title), el('p', 'hook', '«' + i.hook + '»'), el('p', 'why', i.why));
+        cards.append(c);
+      });
+      $('ideas').replaceChildren(el('p', 'summary', ideas.summary), cards);
+    }
+
+    // конкуренты
+    const others = (comp?.accounts || []).filter((a) => !a.own);
+    if (!others.length) {
+      $('c-sub').textContent = 'Список конкурентов пуст или ещё не обработан.';
+      empty($('comp'), 'Впишите логины конкурентов в autopost/settings.json (поле competitors). Робот соберёт по ним открытые данные: что выкладывают, когда и сколько реакций получают.');
+    } else {
+      $('c-sub').textContent = 'Обновлено ' + when(comp.updated_at) + ' · только открытые данные профессиональных аккаунтов';
+      const cards = el('div', 'cards');
+      others.forEach((a) => {
+        const c = el('article', 'card');
+        c.append(el('h3', '', '@' + a.username),
+          el('span', 'num', (a.followers ?? '—') + ' подписчиков · в среднем ' + a.avg_likes + ' лайков · разобрано ' + a.posts_analyzed + ' публикаций'));
+        const ul = el('ul');
+        (a.top || []).slice(0, 3).forEach((p) => {
+          const li = el('li', '', (p.caption || 'без подписи').slice(0, 140));
+          const s = el('small', '', p.likes + ' лайков · ' + p.comments + ' комментариев · ' + when(p.date) + ' ');
+          const link = igLink(p.link, 'открыть'); if (link) s.append(link);
+          li.append(s); ul.append(li);
+        });
+        c.append(ul); cards.append(c);
+      });
+      $('comp').replaceChildren(cards);
+    }
+  })();
+</script>
+</body>
+</html>
