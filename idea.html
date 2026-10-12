@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Идея проекта — Двойник</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #000; --panel: #0b0b0c; --line: rgba(255,255,255,.1); --text: #f4f4f2; --muted: #9a9a9a; --ghost: #2a2a2b; --accent: #2f6bff; --ok: #3fb46b; --warn: #e0a52b; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: "Inter Tight", system-ui, sans-serif; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-underline-offset: 3px; }
+  .page { max-width: 860px; margin: 0 auto; padding: 0 24px 110px; }
+  .top { display: flex; align-items: center; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .logo { font-size: 18px; font-weight: 500; letter-spacing: -.02em; display: flex; align-items: center; gap: 8px; }
+  .logo i { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); }
+  .logo span { color: var(--muted); font-weight: 400; }
+  h1 { font-size: clamp(40px, 7vw, 84px); font-weight: 400; line-height: .93; letter-spacing: -.05em; padding: 64px 0 22px; }
+  h1 em { font-style: normal; color: var(--ghost); }
+  .lead { font-size: clamp(19px, 2.4vw, 24px); letter-spacing: -.015em; line-height: 1.35; color: #dcdcdc; }
+  section { padding: 52px 0 0; }
+  h2 { font-size: clamp(26px, 3.6vw, 38px); font-weight: 400; letter-spacing: -.04em; line-height: 1.05; margin-bottom: 18px; padding-top: 34px; border-top: 1px solid var(--line); }
+  p { color: #cfcfcf; font-size: 17px; }
+  p + p { margin-top: 12px; }
+  ul.plain { padding-left: 20px; display: grid; gap: 8px; margin-top: 12px; color: #cfcfcf; font-size: 17px; }
+
+  .step { display: grid; grid-template-columns: 52px 1fr; gap: 6px 14px; padding: 22px 0; border-bottom: 1px solid var(--line); }
+  .step .n { color: var(--accent); font-size: 14px; padding-top: 5px; }
+  .step h3 { font-size: 22px; font-weight: 400; letter-spacing: -.03em; }
+  .step p { grid-column: 2; font-size: 16px; color: var(--muted); }
+  .go { grid-column: 2; justify-self: start; margin-top: 8px; display: inline-block; text-decoration: none; background: var(--accent); padding: 10px 18px; border-radius: 6px; font-size: 14px; }
+  .go:hover { filter: brightness(1.15); }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 8px; }
+  .card { border: 1px solid var(--line); border-radius: 14px; padding: 22px; background: var(--panel); }
+  .card h3 { font-size: 19px; font-weight: 500; letter-spacing: -.02em; margin-bottom: 8px; }
+  .card p { font-size: 15px; color: var(--muted); }
+  .card .price { font-size: 34px; letter-spacing: -.04em; margin-bottom: 6px; }
+  .card .price small { font-size: 14px; color: var(--muted); letter-spacing: 0; }
+
+  .status { display: grid; gap: 0; margin-top: 8px; }
+  .srow { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: start; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .srow b { font-weight: 500; font-size: 17px; }
+  .srow span { display: block; color: var(--muted); font-size: 15px; }
+  .tag { font-size: 12px; padding: 4px 11px; border-radius: 100px; border: 1px solid var(--line); white-space: nowrap; margin-top: 3px; }
+  .tag.ok { color: #7fdba3; border-color: rgba(63,180,107,.45); }
+  .tag.demo { color: #9dbbff; border-color: rgba(47,107,255,.5); }
+  .tag.wait { color: #f0c466; border-color: rgba(224,165,43,.45); }
+  @media (max-width: 600px) { .page { padding: 0 16px 80px; } .srow { grid-template-columns: 1fr; gap: 6px; } .tag { justify-self: start; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top"><div class="logo"><i></i>двойник <span>идея проекта</span></div></header>
+
+  <h1>Блог ведётся. <em>Человек не снимается.</em></h1>
+  <p class="lead">«Двойник» — сервис, который делает человеку цифрового аватара с его лицом и голосом, сам готовит для него рилсы и сам выкладывает их в Instagram в лучшее время. Клиент один раз записывает короткое видео — дальше контент выходит без его участия.</p>
+
+  <section>
+    <h2>Для кого это и зачем</h2>
+    <p>Эксперты и небольшие бизнесы — косметологи, риелторы, тренеры, преподаватели — знают, что рилсы приводят клиентов, но не снимают их: нет времени, сил, не нравится себя в кадре. Регулярности не получается, аккаунт стоит.</p>
+    <p>Мы забираем у них всю цепочку: что снять, как снять, когда выложить. Клиенту остаётся посмотреть готовый ролик и сказать «да».</p>
+  </section>
+
+  <section>
+    <h2>Путь клиента</h2>
+    <div class="step"><span class="n">01</span><h3>Заявка на сайте</h3><p>Вместо созвона — короткая анкета: чем занимается, кто аудитория, о чём хочет рилсы. Выбирает пакет.</p></div>
+    <div class="step"><span class="n">02</span><h3>Оплата и личный кабинет</h3><p>После оплаты открывается кабинет. Туда клиент загружает 2–3 минуты видео по нашей памятке.</p></div>
+    <div class="step"><span class="n">03</span><h3>Мы собираем аватара</h3><p>Создаём двойника в HeyGen, клонируем голос, готовим контент-план.</p></div>
+    <div class="step"><span class="n">04</span><h3>Ролики приходят в кабинет</h3><p>Клиент смотрит, скачивает, одним нажатием принимает или пишет, что поправить.</p></div>
+    <div class="step"><span class="n">05</span><h3>Робот выкладывает сам</h3><p>Принятые ролики встают в очередь и публикуются в Instagram в то время, когда аудитория активнее всего.</p></div>
+  </section>
+
+  <section>
+    <h2>Что делает система сама</h2>
+    <div class="cards">
+      <div class="card"><h3>Автопостинг</h3><p>Ролик из очереди выходит в Instagram как Reels в назначенное время — без человека и без включённого компьютера.</p></div>
+      <div class="card"><h3>Выбор времени</h3><p>Робот смотрит, в какие часы публикации — свои и конкурентов — собирают больше реакций, и ставит ролики на эти окна.</p></div>
+      <div class="card"><h3>Анализ конкурентов</h3><p>Раз в сутки собирает открытые данные по списку аккаунтов: что выложили, когда, сколько лайков и комментариев.</p></div>
+      <div class="card"><h3>Подсказки «что снять»</h3><p>Нейросеть читает эту статистику и предлагает темы роликов с объяснением, почему они должны зайти.</p></div>
+    </div>
+    <p style="margin-top:18px">Чего система не делает и не обещает: выбирать аудиторию для обычного поста нельзя — это решает алгоритм Instagram. Мы влияем на охват темой, подписью и временем. Закрытую статистику чужих аккаунтов Instagram не отдаёт никому, поэтому по конкурентам используются только открытые цифры.</p>
+  </section>
+
+  <section>
+    <h2>Пакеты</h2>
+    <div class="cards">
+      <div class="card"><div class="price">$300 <small>разово</small></div><h3>Старт</h3><p>Аватар, клон голоса, настройка HeyGen, 5 рилсов и инструкция — дальше клиент делает ролики сам.</p></div>
+      <div class="card"><div class="price">$1000 <small>в месяц</small></div><h3>Про</h3><p>Контент-план и 15 рилсов под ключ, два образа аватара, подписка HeyGen включена.</p></div>
+      <div class="card"><div class="price">$2000 <small>в месяц</small></div><h3>Премиум</h3><p>30 рилсов, стратегия, четыре образа, все сервисы включены, еженедельный разбор статистики.</p></div>
+    </div>
+    <p style="margin-top:18px">Состав пакетов и количество роликов — рабочая версия, цифры можно менять.</p>
+  </section>
+
+  <section>
+    <h2>Как посмотреть вживую — пять минут</h2>
+    <p>Всё ниже открывается без регистрации. Кабинеты работают в демо-режиме: данные выдуманные или сохраняются только в вашем браузере, наружу ничего не уходит.</p>
+    <div class="step"><span class="n">1</span><h3>Откройте сайт и оставьте заявку</h3><p>Пролистайте до формы внизу, заполните анкету любыми данными и нажмите «Отправить».</p><a class="go" href="index.html" target="_blank" rel="noopener">Открыть сайт</a></div>
+    <div class="step"><span class="n">2</span><h3>Найдите её в кабинете заявок</h3><p>Ваша заявка появится первой во вкладке «Новые». Поменяйте статус, напишите заметку, вставьте ссылку на результат.</p><a class="go" href="admin.html" target="_blank" rel="noopener">Открыть кабинет заявок</a></div>
+    <div class="step"><span class="n">3</span><h3>Посмотрите глазами клиента</h3><p>Кабинет клиента: загрузка видео для аватара, готовые ролики с приёмкой и правками, контент-план, сообщения, подписка.</p><a class="go" href="client.html" target="_blank" rel="noopener">Открыть кабинет клиента</a></div>
+    <div class="step"><span class="n">4</span><h3>Посмотрите, что делает робот</h3><p>Очередь публикаций, лучшее время, подсказки «что снять» и сводка по конкурентам — на примере.</p><a class="go" href="autopost.html" target="_blank" rel="noopener">Открыть автопостинг</a></div>
+  </section>
+
+  <section>
+    <h2>Что готово, а что ещё нет</h2>
+    <div class="status">
+      <div class="srow"><div><b>Сайт с оффером, пакетами и анкетой</b><span>Опубликован, открывается с любого устройства.</span></div><span class="tag ok">готово</span></div>
+      <div class="srow"><div><b>Кабинет заявок</b><span>Работает в демо. Чтобы заявки приходили по-настоящему, нужно подключить базу — около 10 минут.</span></div><span class="tag demo">демо</span></div>
+      <div class="srow"><div><b>Кабинет клиента</b><span>Кликабельный макет. Настоящим станет после подключения базы и входа для клиентов.</span></div><span class="tag demo">макет</span></div>
+      <div class="srow"><div><b>Робот автопостинга и анализа</b><span>Написан и запущен по расписанию, логика подбора времени проверена. Реальную публикацию проверить пока нечем.</span></div><span class="tag wait">ждёт Instagram</span></div>
+      <div class="srow"><div><b>Доступ к Instagram</b><span>Нужен рабочий аккаунт Facebook, чтобы получить ключ для публикаций. С текущим аккаунтом вход не восстанавливается.</span></div><span class="tag wait">нужен доступ</span></div>
+      <div class="srow"><div><b>Приём оплаты</b><span>Не начат: зависит от страны клиентов и того, куда получаем деньги.</span></div><span class="tag wait">нужно решение</span></div>
+      <div class="srow"><div><b>Подписка HeyGen</b><span>Пока не оформлена; создание аватаров идёт вручную после её покупки.</span></div><span class="tag wait">позже</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Что нужно, чтобы запустить</h2>
+    <ul class="plain">
+      <li>Рабочий аккаунт Facebook (свой или руководителя) — для ключа Instagram.</li>
+      <li>Решение по оплате: из какой страны клиенты и на что принимаем деньги.</li>
+      <li>Подписка HeyGen и, для подсказок, ключ нейросети.</li>
+      <li>Данные для политики конфиденциальности: от чьего имени работает сервис.</li>
+    </ul>
+  </section>
+</div>
+</body>
+</html>

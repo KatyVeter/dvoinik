@@ -522,6 +522,7 @@
   <div class="form-done" id="form-done" hidden>
     <h3>Заявка у меня</h3>
     <p>Спасибо! В течение дня отвечу на почту, которую вы оставили: пришлю примеры и инструкцию по съёмке.</p>
+    <p id="demo-note" hidden>Демо-режим: заявка никуда не отправлена, она сохранена только в этом браузере. <a href="admin.html" style="color:var(--text);text-decoration:underline">Открыть кабинет и увидеть её →</a></p>
   </div>
 </section>
 
@@ -572,8 +573,24 @@
     if (!f.consent.checked) return fail(f.consent, 'Без согласия на обработку данных я не могу принять заявку — поставьте галочку.');
     if (f.website.value) return; // бот
 
+    // Демо-режим: пока база не подключена, заявка сохраняется только в этом браузере
+    // и появляется в демо-кабинете (admin.html) — чтобы можно было показать весь путь.
     if (!DB.SUPABASE_URL || !DB.SUPABASE_KEY) {
-      msg.textContent = 'Форма ещё не подключена к приёму заявок — заявка не отправлена.';
+      try {
+        const saved = JSON.parse(localStorage.getItem('dvoinik_demo_leads') || '[]');
+        saved.unshift({
+          id: 'local-' + Date.now(), created_at: new Date().toISOString(),
+          name, email, about, blog: f.blog.value.trim(), plan: f.plan.value, goal: f.goal.value.trim(),
+          consent: 'Согласие дано ' + new Date().toLocaleString('ru-RU'), status: 'new', notes: '', result_url: ''
+        });
+        localStorage.setItem('dvoinik_demo_leads', JSON.stringify(saved.slice(0, 50)));
+      } catch (err) {
+        msg.textContent = 'Демо-режим: браузер не дал сохранить заявку. Откройте сайт в обычном (не приватном) окне.';
+        return;
+      }
+      form.hidden = true;
+      document.getElementById('form-done').hidden = false;
+      document.getElementById('demo-note').hidden = false;
       return;
     }
 

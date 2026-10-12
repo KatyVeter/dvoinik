@@ -55,6 +55,7 @@
 </style>
 </head>
 <body>
+<div id="demo" hidden style="background:rgba(224,165,43,.12);border-bottom:1px solid rgba(224,165,43,.3);color:#f0c466;padding:10px 24px;font-size:14px;text-align:center">Демо-режим: Instagram ещё не подключён. Ролики, аккаунты, цифры и подсказки ниже — выдуманный пример того, как страница выглядит в работе.</div>
 <div class="page">
   <header class="top">
     <div class="logo"><i></i>двойник <span>автопостинг</span></div>
@@ -104,10 +105,55 @@
   };
 
   (async () => {
-    const [queue, times, ideas, comp] = await Promise.all([
+    let [queue, times, ideas, comp] = await Promise.all([
       load('autopost/queue.json'), load('autopost/data/best-times.json'),
       load('autopost/data/ideas.json'), load('autopost/data/competitors.json')
     ]);
+
+    // Демо: пока Instagram не подключён и настоящих данных нет, показываем выдуманный пример,
+    // чтобы было видно, как страница выглядит в работе. Появятся настоящие данные — демо исчезнет.
+    if (!(queue && queue.length) && !times && !ideas && !comp) {
+      $('demo').hidden = false;
+      const day = (n, hm) => { const d = new Date(Date.now() + n * 864e5); return d.toISOString().slice(0, 10) + ' ' + hm; };
+      const iso = (n) => new Date(Date.now() + n * 864e5).toISOString();
+      queue = [
+        { video: 'videos/tri-oshibki-v-uhode.mp4', caption: 'Три ошибки в уходе после 30', publish_at: day(-2, '19:00'), status: 'published', published_at: iso(-2), auto: true },
+        { video: 'videos/spf-zimoj.mp4', caption: 'SPF зимой — нужен или нет', publish_at: day(-1, '19:00'), status: 'published', published_at: iso(-1), auto: true },
+        { video: 'videos/domashnij-uhod.mp4', caption: 'Домашний уход за 10 минут', publish_at: day(1, '19:00'), status: 'queued', auto: true },
+        { video: 'videos/retinol-s-chego-nachat.mp4', caption: 'Ретинол: с чего начать', publish_at: day(2, '13:00'), status: 'queued', auto: true },
+        { video: 'videos/razbor-kosmetichki.mp4', caption: 'Разбор косметички подписчицы', publish_at: 'auto', status: 'queued' }
+      ];
+      const shape = [2,1,1,0,0,1,2,4,6,7,6,7,9,10,7,6,6,8,10,13,11,8,5,3];
+      times = {
+        updated_at: iso(0), timezone: 'Europe/Moscow', slots: ['19:00', '13:00', '09:00'],
+        note: 'Время выбрано по статистике публикаций.', based_on: { own_posts: 24, competitor_posts: 90 },
+        by_hour: shape.map((s, hour) => ({ hour, posts: 3 + (s % 5), score: s / 6 }))
+      };
+      ideas = {
+        updated_at: iso(0),
+        summary: 'В нише сейчас лучше всего заходят короткие разборы ошибок и ролики «до/после» с конкретной цифрой в первой фразе. Длинные вступления и общие советы собирают заметно меньше реакций.',
+        ideas: [
+          { format: 'Разбор ошибок', title: 'Пять привычек, которые старят кожу быстрее солнца', hook: 'Вы делаете это каждый вечер и не замечаете.', why: 'У трёх конкурентов разборы ошибок собрали в 2–3 раза больше комментариев, чем обычные ролики.' },
+          { format: 'Миф и правда', title: 'Дорогой крем против аптечного', hook: 'Этот крем за 600 рублей работает лучше, чем банка за шесть тысяч.', why: 'Сравнения с ценой — самые сохраняемые ролики в подборке за последний месяц.' },
+          { format: 'Ответ на вопрос', title: 'Можно ли ретинол летом', hook: 'Меня спрашивают об этом каждый день, отвечаю один раз.', why: 'Ваш ролик про SPF набрал больше обычного — аудитория откликается на сезонные темы.' },
+          { format: 'История клиента', title: 'Что изменилось за шесть недель', hook: 'Она пришла с одной просьбой: чтобы не было стыдно без тональника.', why: 'Истории с результатом досматривают чаще всего, судя по реакциям у конкурентов.' }
+        ]
+      };
+      comp = {
+        updated_at: iso(0),
+        accounts: [
+          { username: 'primer.kosmetolog', followers: 48200, avg_likes: 1340, posts_analyzed: 30, top: [
+            { caption: 'Пять ошибок в умывании, которые делают почти все', likes: 5210, comments: 312, date: iso(-4), link: '' },
+            { caption: 'Крем за 500 против крема за 5000 — разница есть?', likes: 4480, comments: 267, date: iso(-9), link: '' } ] },
+          { username: 'primer.skinlab', followers: 21700, avg_likes: 610, posts_analyzed: 30, top: [
+            { caption: 'Что будет, если месяц не пользоваться SPF', likes: 2890, comments: 141, date: iso(-6), link: '' },
+            { caption: 'Мой уход за 10 минут утром', likes: 1975, comments: 88, date: iso(-12), link: '' } ] },
+          { username: 'primer.dr.beauty', followers: 96500, avg_likes: 2260, posts_analyzed: 30, top: [
+            { caption: 'Ретинол: три правила, чтобы не сжечь лицо', likes: 8120, comments: 540, date: iso(-3), link: '' },
+            { caption: 'Почему чистка лица не убирает чёрные точки', likes: 6040, comments: 395, date: iso(-15), link: '' } ] }
+        ]
+      };
+    }
 
     // очередь
     const STATUS = { queued: ['В очереди', 'now'], published: ['Опубликован', 'ok'], failed: ['Ошибка', 'bad'] };

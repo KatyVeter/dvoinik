@@ -109,7 +109,7 @@
 
 <!-- кабинет -->
 <div id="app" hidden>
-  <div class="demo" id="demo" hidden>Демо-режим: база ещё не подключена, заявки ниже — выдуманные примеры. Изменения не сохраняются.</div>
+  <div class="demo" id="demo" hidden>Демо-режим: база ещё не подключена. Ниже — выдуманные примеры и заявки, которые вы сами оставили на сайте в этом браузере. Никуда наружу они не уходят.</div>
   <header class="top">
     <div class="logo"><i></i>двойник <span>кабинет</span></div>
     <div class="sp"></div>
@@ -160,22 +160,32 @@
       { id: 'd4', created_at: ago(240), name: 'Тимур', email: 'timur@example.com', blog: '', plan: 'Премиум', about: 'Фитнес-тренер, свой зал, аудитория 20–35.', goal: 'Рилсы каждый день.', consent: 'Согласие дано', status: 'done', notes: '', result_url: 'https://example.com/timur-reels' }
     ];
   };
-  let demoData = demoLeads();
+  // В демо к примерам добавляются заявки, оставленные через форму сайта в этом же браузере.
+  const LS = 'dvoinik_demo_leads';
+  const readLS = () => { try { return JSON.parse(localStorage.getItem(LS)) || []; } catch { return []; } };
+  const writeLS = (arr) => { try { localStorage.setItem(LS, JSON.stringify(arr)); } catch {} };
+  let demoSamples = demoLeads();
+  const demoPatch = (id, fn) => {
+    const stored = readLS(); const i = stored.findIndex((l) => l.id === id);
+    if (i >= 0) { const next = fn(stored[i]); if (next) stored[i] = next; else stored.splice(i, 1); writeLS(stored); return; }
+    const j = demoSamples.findIndex((l) => l.id === id);
+    if (j >= 0) { const next = fn(demoSamples[j]); if (next) demoSamples[j] = next; else demoSamples.splice(j, 1); }
+  };
 
   const api = {
     async list() {
-      if (DEMO) return demoData;
+      if (DEMO) return [...readLS(), ...demoSamples].sort((a, b) => b.created_at.localeCompare(a.created_at));
       const { data, error } = await sb.from('leads').select('*').order('created_at', { ascending: false });
       if (error) throw error;
       return data;
     },
     async update(id, patch) {
-      if (DEMO) { Object.assign(demoData.find((l) => l.id === id), patch); return; }
+      if (DEMO) { demoPatch(id, (l) => ({ ...l, ...patch })); return; }
       const { error } = await sb.from('leads').update(patch).eq('id', id);
       if (error) throw error;
     },
     async remove(id) {
-      if (DEMO) { demoData = demoData.filter((l) => l.id !== id); return; }
+      if (DEMO) { demoPatch(id, () => null); return; }
       const { error } = await sb.from('leads').delete().eq('id', id);
       if (error) throw error;
     },
