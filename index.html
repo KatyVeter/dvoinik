@@ -531,6 +531,7 @@
   <a href="privacy.html">Политика конфиденциальности</a>
 </footer>
 
+<script src="config.js"></script>
 <script>
   document.documentElement.classList.add('js');
   document.querySelectorAll('a[href^="#"]').forEach((a) => {
@@ -542,9 +543,9 @@
     });
   });
   // ---------- заявка ----------
-  // Сюда вставляется адрес сервиса, который принимает заявки (Formspree, Web3Forms и т.п.).
-  // Пока строка пустая, форма ничего никуда не отправляет.
-  const FORM_ENDPOINT = '';
+  // Заявки записываются в базу Supabase, а читаются в кабинете (admin.html).
+  // Адрес базы и ключ лежат в config.js; пока они пустые, форма ничего не отправляет.
+  const DB = window.DVOINIK || {};
 
   const form = document.getElementById('lead-form');
   const msg = document.getElementById('form-msg');
@@ -571,7 +572,7 @@
     if (!f.consent.checked) return fail(f.consent, 'Без согласия на обработку данных я не могу принять заявку — поставьте галочку.');
     if (f.website.value) return; // бот
 
-    if (!FORM_ENDPOINT) {
+    if (!DB.SUPABASE_URL || !DB.SUPABASE_KEY) {
       msg.textContent = 'Форма ещё не подключена к приёму заявок — заявка не отправлена.';
       return;
     }
@@ -579,10 +580,23 @@
     const btn = form.querySelector('button');
     btn.disabled = true; btn.textContent = 'Отправляю…';
     try {
-      const data = new FormData(form);
-      data.delete('website');
-      data.set('consent', 'Согласие дано ' + new Date().toLocaleString('ru-RU'));
-      const res = await fetch(FORM_ENDPOINT, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
+      const lead = {
+        name, email, about,
+        blog: f.blog.value.trim(),
+        plan: f.plan.value,
+        goal: f.goal.value.trim(),
+        consent: 'Согласие дано ' + new Date().toLocaleString('ru-RU')
+      };
+      const res = await fetch(DB.SUPABASE_URL + '/rest/v1/leads', {
+        method: 'POST',
+        headers: {
+          apikey: DB.SUPABASE_KEY,
+          Authorization: 'Bearer ' + DB.SUPABASE_KEY,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal'
+        },
+        body: JSON.stringify(lead)
+      });
       if (!res.ok) throw new Error(res.status);
       form.hidden = true;
       document.getElementById('form-done').hidden = false;

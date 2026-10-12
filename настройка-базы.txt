@@ -1,0 +1,85 @@
+-- Настройка базы заявок для сайта «Двойник».
+-- Выполняется один раз в Supabase: SQL Editor → вставить весь текст → Run.
+-- ВАЖНО: сначала создайте себе пользователя (Authentication → Users → Add user),
+-- и только потом запускайте этот текст — первый пользователь проекта станет владельцем кабинета.
+
+-- 1. Таблица заявок
+create table if not exists public.leads (
+  id          uuid primary key default gen_random_uuid(),
+  created_at  timestamptz not null default now(),
+  name        text not null check (char_length(name) between 1 and 80),
+  email       text not null check (char_length(email) between 3 and 120),
+  blog        text check (char_length(blog) <= 200),
+  plan        text check (char_length(plan) <= 40),
+  about       text check (char_length(about) <= 1000),
+  goal        text check (char_length(goal) <= 1000),
+  consent     text check (char_length(consent) <= 100),
+  status      text not null default 'new' check (status in ('new', 'work', 'done', 'archive')),
+  notes       text not null default '',
+  result_url  text not null default ''
+);
+
+-- 2. Кто владелец кабинета
+create table if not exists public.admins (
+  user_id uuid primary key references auth.users (id) on delete cascade
+);
+alter table public.admins enable row level security;
+
+insert into public.admins (user_id)
+select id from auth.users order by created_at limit 1
+on conflict do nothing;
+
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (select 1 from public.admins where user_id = auth.uid());
+$$;
+
+-- 3. Права: посетитель сайта может только добавить новую заявку,
+--    читать, менять и удалять заявки может только владелец после входа в кабинет.
+alter table public.leads enable row level security;
+
+revoke all on public.leads from anon, authenticated;
+grant insert on public.leads to anon, authenticated;
+grant select, update, delete on public.leads to authenticated;
+
+drop policy if exists "site adds leads" on public.leads;
+create policy "site adds leads" on public.leads
+  for insert to anon, authenticated
+  with check (status = 'new' and notes = '' and result_url = '');
+
+drop policy if exists "owner reads leads" on public.leads;
+create policy "owner reads leads" on public.leads
+  for select to authenticated using (public.is_admin());
+
+drop policy if exists "owner updates leads" on public.leads;
+create policy "owner updates leads" on public.leads
+  for update to authenticated using (public.is_admin()) with check (public.is_admin());
+
+drop policy if exists "owner deletes leads" on public.leads;
+create policy "owner deletes leads" on public.leads
+  for delete to authenticated using (public.is_admin());
+
+-- 4. Хранилище готовых роликов: загружает только владелец,
+--    клиент скачивает по длинной ссылке, которую нельзя угадать.
+insert into storage.buckets (id, name, public)
+values ('results', 'results', true)
+on conflict (id) do nothing;
+
+drop policy if exists "owner uploads results" on storage.objects;
+create policy "owner uploads results" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'results' and public.is_admin());
+
+drop policy if exists "owner removes results" on storage.objects;
+create policy "owner removes results" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'results' and public.is_admin());
+
+-- Проверка: должна вернуться одна строка с вашей почтой.
+select u.email as "владелец кабинета"
+from public.admins a join auth.users u on u.id = a.user_id;

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кабинет — Двойник</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #000; --panel: #0b0b0c; --panel-2: #141415; --line: rgba(255,255,255,.1);
+    --text: #f4f4f2; --muted: #8b8b8b; --accent: #2f6bff;
+    --new: #2f6bff; --work: #e0a52b; --done: #3fb46b; --archive: #5c5c5c; --bad: #ff6b6b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: "Inter Tight", system-ui, sans-serif; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  [hidden] { display: none !important; }
+
+  .btn { color: var(--text); background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 10px 16px; font-size: 14px; cursor: pointer; transition: .2s; }
+  .btn:hover { border-color: #666; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); }
+  .btn.primary:hover { filter: brightness(1.15); }
+  .btn.danger:hover { border-color: var(--bad); color: var(--bad); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .input { width: 100%; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; font-size: 15px; }
+  .input:focus { outline: none; border-color: var(--accent); }
+
+  /* вход */
+  .login { min-height: 100svh; display: grid; place-items: center; padding: 20px; }
+  .login form { width: 100%; max-width: 360px; display: grid; gap: 14px; }
+  .login h1 { font-size: 40px; font-weight: 400; letter-spacing: -.04em; line-height: 1; margin-bottom: 6px; }
+  .login p { color: var(--muted); font-size: 14px; }
+  .login label { display: grid; gap: 6px; font-size: 13px; color: var(--muted); }
+  .err { color: var(--bad); font-size: 14px; min-height: 1.4em; }
+
+  /* шапка */
+  .top { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .logo { font-size: 18px; font-weight: 500; letter-spacing: -.02em; display: flex; align-items: center; gap: 8px; }
+  .logo i { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); }
+  .logo span { color: var(--muted); font-weight: 400; }
+  .top .sp { flex: 1; }
+  .demo { background: rgba(224,165,43,.12); border-bottom: 1px solid rgba(224,165,43,.3); color: #f0c466; padding: 10px 24px; font-size: 14px; }
+
+  .bar { display: flex; gap: 12px; padding: 16px 24px; align-items: center; flex-wrap: wrap; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tab { background: none; border: 1px solid var(--line); border-radius: 100px; padding: 7px 14px; font-size: 13px; cursor: pointer; color: var(--muted); }
+  .tab b { font-weight: 500; margin-left: 6px; color: var(--text); }
+  .tab.on { background: var(--text); color: #000; border-color: var(--text); }
+  .tab.on b { color: #000; }
+  .bar .input { max-width: 280px; padding: 8px 12px; font-size: 14px; margin-left: auto; }
+
+  .wrap { display: grid; grid-template-columns: minmax(280px, 380px) 1fr; gap: 0; border-top: 1px solid var(--line); min-height: calc(100svh - 140px); }
+  .list { border-right: 1px solid var(--line); overflow-y: auto; max-height: calc(100svh - 140px); }
+  .item { display: block; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 16px 24px; cursor: pointer; }
+  .item:hover { background: var(--panel); }
+  .item.on { background: var(--panel-2); }
+  .item .r1 { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+  .item .nm { font-size: 16px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .item .dt { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .item .r2 { display: flex; gap: 8px; align-items: center; margin-top: 6px; font-size: 13px; color: var(--muted); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .s-new { background: var(--new); } .s-work { background: var(--work); } .s-done { background: var(--done); } .s-archive { background: var(--archive); }
+  .empty { padding: 48px 24px; color: var(--muted); font-size: 15px; }
+
+  .detail { padding: 28px 32px 60px; max-width: 860px; }
+  .detail h2 { font-size: 34px; font-weight: 400; letter-spacing: -.035em; line-height: 1.05; }
+  .meta { display: flex; gap: 10px 18px; flex-wrap: wrap; color: var(--muted); font-size: 14px; margin: 10px 0 24px; }
+  .meta a { color: var(--text); text-underline-offset: 3px; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 26px; }
+  .row select.input { width: auto; padding: 9px 12px; font-size: 14px; }
+  .block { border-top: 1px solid var(--line); padding: 20px 0; }
+  .block h3 { font-size: 12px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .block p { font-size: 16px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .block p.none { color: var(--muted); }
+  textarea.input { resize: vertical; min-height: 90px; }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .hint.ok { color: var(--done); } .hint.bad { color: var(--bad); }
+  .res { display: grid; gap: 10px; }
+  .res .line { display: flex; gap: 10px; flex-wrap: wrap; }
+  .res .line .input { flex: 1; min-width: 220px; }
+
+  @media (max-width: 820px) {
+    .wrap { grid-template-columns: 1fr; }
+    .list { border-right: 0; max-height: 44svh; border-bottom: 1px solid var(--line); }
+    .detail { padding: 22px 20px 60px; }
+    .top, .bar, .demo { padding-left: 16px; padding-right: 16px; }
+    .item { padding: 14px 16px; }
+    .bar .input { max-width: none; margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- вход -->
+<div class="login" id="login" hidden>
+  <form id="login-form">
+    <div class="logo"><i></i>двойник <span>кабинет</span></div>
+    <h1>Вход</h1>
+    <p>Почта и пароль, которые вы задали в Supabase.</p>
+    <label>Почта <input class="input" type="email" name="email" autocomplete="username" required></label>
+    <label>Пароль <input class="input" type="password" name="password" autocomplete="current-password" required></label>
+    <div class="err" id="login-err" role="alert"></div>
+    <button class="btn primary" type="submit">Войти</button>
+  </form>
+</div>
+
+<!-- кабинет -->
+<div id="app" hidden>
+  <div class="demo" id="demo" hidden>Демо-режим: база ещё не подключена, заявки ниже — выдуманные примеры. Изменения не сохраняются.</div>
+  <header class="top">
+    <div class="logo"><i></i>двойник <span>кабинет</span></div>
+    <div class="sp"></div>
+    <button class="btn" id="refresh">Обновить</button>
+    <a class="btn" href="index.html" style="text-decoration:none">На сайт</a>
+    <button class="btn" id="logout">Выйти</button>
+  </header>
+  <div class="bar">
+    <div class="tabs" id="tabs"></div>
+    <input class="input" id="search" type="search" placeholder="Поиск по имени, почте, тексту">
+  </div>
+  <div class="wrap">
+    <div class="list" id="list"></div>
+    <div class="detail" id="detail"></div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+  const cfg = window.DVOINIK || {};
+  const DEMO = !cfg.SUPABASE_URL || !cfg.SUPABASE_KEY;
+  const sb = (!DEMO && window.supabase) ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY) : null;
+
+  const STATUS = { new: 'Новая', work: 'В работе', done: 'Готово', archive: 'Архив' };
+  const $ = (id) => document.getElementById(id);
+
+  // маленький помощник: собирает элемент, текст всегда вставляется как текст, а не как HTML
+  const h = (tag, props = {}, ...kids) => {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)) {
+      if (k === 'class') el.className = v;
+      else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+      else if (v !== false && v != null) el.setAttribute(k, v === true ? '' : v);
+    }
+    for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid);
+    return el;
+  };
+
+  // ---------- данные ----------
+  const demoLeads = () => {
+    const ago = (h) => new Date(Date.now() - h * 3600e3).toISOString();
+    return [
+      { id: 'd1', created_at: ago(2), name: 'Алина', email: 'alina@example.com', blog: 'instagram.com/alina.skin', plan: 'Про', about: 'Косметолог, клиенты — женщины 25–45, веду блог про уход за кожей.', goal: 'Хочу выходить каждый день, но не успеваю сниматься.', consent: 'Согласие дано', status: 'new', notes: '', result_url: '' },
+      { id: 'd2', created_at: ago(26), name: 'Марк', email: 'mark@example.com', blog: '', plan: 'Пока не знаю', about: 'Риелтор, продаю новостройки, аудитория — семьи с детьми.', goal: '', consent: 'Согласие дано', status: 'new', notes: '', result_url: '' },
+      { id: 'd3', created_at: ago(80), name: 'Ольга Сергеевна', email: 'olga@example.com', blog: 'youtube.com/@olga-english', plan: 'Старт', about: 'Преподаю английский онлайн, взрослые ученики.', goal: 'Короткие ролики с разбором ошибок.', consent: 'Согласие дано', status: 'work', notes: 'Видео прислала, аватар собирается.', result_url: '' },
+      { id: 'd4', created_at: ago(240), name: 'Тимур', email: 'timur@example.com', blog: '', plan: 'Премиум', about: 'Фитнес-тренер, свой зал, аудитория 20–35.', goal: 'Рилсы каждый день.', consent: 'Согласие дано', status: 'done', notes: '', result_url: 'https://example.com/timur-reels' }
+    ];
+  };
+  let demoData = demoLeads();
+
+  const api = {
+    async list() {
+      if (DEMO) return demoData;
+      const { data, error } = await sb.from('leads').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    async update(id, patch) {
+      if (DEMO) { Object.assign(demoData.find((l) => l.id === id), patch); return; }
+      const { error } = await sb.from('leads').update(patch).eq('id', id);
+      if (error) throw error;
+    },
+    async remove(id) {
+      if (DEMO) { demoData = demoData.filter((l) => l.id !== id); return; }
+      const { error } = await sb.from('leads').delete().eq('id', id);
+      if (error) throw error;
+    },
+    async upload(id, file) {
+      if (DEMO) throw new Error('В демо-режиме файлы не загружаются.');
+      // имя файла в хранилище должно быть латиницей, поэтому всё лишнее заменяем
+      const safe = file.name.replace(/[^a-zA-Z0-9._-]+/g, '_').slice(-60) || 'file';
+      const path = id + '/' + crypto.randomUUID() + '-' + safe;
+      const { error } = await sb.storage.from('results').upload(path, file);
+      if (error) throw error;
+      return sb.storage.from('results').getPublicUrl(path).data.publicUrl;
+    }
+  };
+
+  // ---------- состояние ----------
+  let leads = [], filter = 'new', query = '', currentId = null;
+
+  const fmtDate = (iso) => new Date(iso).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  const visible = () => leads.filter((l) =>
+    (filter === 'all' || l.status === filter) &&
+    (!query || [l.name, l.email, l.blog, l.about, l.goal, l.notes].join(' ').toLowerCase().includes(query)));
+
+  const renderTabs = () => {
+    const count = (s) => leads.filter((l) => s === 'all' || l.status === s).length;
+    const tabs = [['new', 'Новые'], ['work', 'В работе'], ['done', 'Готово'], ['archive', 'Архив'], ['all', 'Все']];
+    $('tabs').replaceChildren(...tabs.map(([key, label]) =>
+      h('button', { class: 'tab' + (filter === key ? ' on' : ''), onclick: () => { filter = key; render(); } }, label, h('b', {}, String(count(key))))));
+  };
+
+  const renderList = () => {
+    const rows = visible();
+    if (!rows.length) {
+      $('list').replaceChildren(h('div', { class: 'empty' }, leads.length ? 'Здесь пока пусто.' : 'Заявок ещё нет. Когда кто-то заполнит анкету на сайте, она появится здесь.'));
+      return;
+    }
+    $('list').replaceChildren(...rows.map((l) =>
+      h('button', { class: 'item' + (l.id === currentId ? ' on' : ''), onclick: () => { currentId = l.id; render(); } },
+        h('div', { class: 'r1' }, h('span', { class: 'nm' }, l.name), h('span', { class: 'dt' }, fmtDate(l.created_at))),
+        h('div', { class: 'r2' }, h('i', { class: 'dot s-' + l.status }), STATUS[l.status] + ' · ' + (l.plan || 'пакет не выбран')))));
+  };
+
+  const mailText = (l, kind) => {
+    const hi = 'Здравствуйте, ' + l.name + '!\n\n';
+    if (kind === 'result') {
+      return { subject: 'Ваши ролики готовы', body: hi + 'Ваши ролики готовы, скачать можно по ссылке:\n' + (l.result_url || '[ссылка]') + '\n\nПосмотрите, пожалуйста, и напишите, если что-то хочется поправить.\n' };
+    }
+    return { subject: 'Ваша заявка на цифрового двойника', body: hi + 'Спасибо за заявку! Вам подойдёт пакет «' + (l.plan && l.plan !== 'Пока не знаю' ? l.plan : '…') + '».\n\nЧтобы я собрала аватара, запишите, пожалуйста, видео на 2–3 минуты:\n— телефон вертикально, на уровне глаз, на штативе или опоре;\n— ровный свет в лицо, тихая комната;\n— смотрите в камеру и говорите как обычно, на любую тему.\n\nВидео пришлите ответом на это письмо.\n' };
+  };
+
+  const renderDetail = () => {
+    const l = leads.find((x) => x.id === currentId);
+    if (!l) { $('detail').replaceChildren(h('div', { class: 'empty' }, 'Выберите заявку слева.')); return; }
+
+    const hint = h('div', { class: 'hint' });
+    const say = (text, cls = '') => { hint.textContent = text; hint.className = 'hint ' + cls; };
+    const save = async (patch, okText = 'Сохранено') => {
+      try { await api.update(l.id, patch); Object.assign(l, patch); say(okText, 'ok'); renderTabs(); renderList(); }
+      catch (e) { say('Не сохранилось: ' + (e.message || e), 'bad'); }
+    };
+    const field = (title, value) => h('div', { class: 'block' }, h('h3', {}, title), h('p', { class: value ? '' : 'none' }, value || 'не указано'));
+    const mailBtns = (kind, label) => {
+      const m = mailText(l, kind);
+      return [
+        h('a', { class: 'btn' + (kind === 'result' ? ' primary' : ''), style: 'text-decoration:none', href: 'mailto:' + encodeURIComponent(l.email) + '?subject=' + encodeURIComponent(m.subject) + '&body=' + encodeURIComponent(m.body) }, label),
+        h('button', { class: 'btn', onclick: async () => {
+          try { await navigator.clipboard.writeText(m.body); say('Текст письма скопирован — вставьте его в письмо на ' + l.email, 'ok'); }
+          catch (e) { say('Не получилось скопировать.', 'bad'); }
+        } }, 'Скопировать текст')
+      ];
+    };
+
+    const status = h('select', { class: 'input', onchange: (e) => save({ status: e.target.value }, 'Статус изменён') },
+      Object.entries(STATUS).map(([k, v]) => h('option', { value: k, selected: l.status === k }, v)));
+    const notes = h('textarea', { class: 'input', placeholder: 'Видно только вам: о чём договорились, что осталось сделать' });
+    notes.value = l.notes || '';
+    notes.addEventListener('change', () => save({ notes: notes.value.slice(0, 5000) }, 'Заметка сохранена'));
+
+    const link = h('input', { class: 'input', type: 'url', placeholder: 'Ссылка на готовые ролики (диск, облако)' });
+    link.value = l.result_url || '';
+    const file = h('input', { type: 'file', hidden: true });
+    const upBtn = h('button', { class: 'btn', onclick: () => file.click() }, 'Загрузить файл');
+    file.addEventListener('change', async () => {
+      const f = file.files[0]; if (!f) return;
+      upBtn.disabled = true; say('Загружаю «' + f.name + '»…');
+      try { const url = await api.upload(l.id, f); link.value = url; await save({ result_url: url }, 'Файл загружен, ссылка сохранена'); render(); }
+      catch (e) { say('Файл не загрузился: ' + (e.message || e), 'bad'); }
+      upBtn.disabled = false; file.value = '';
+    });
+
+    const blogUrl = l.blog && /^[\w.-]+\.[a-z]{2,}([/?#].*)?$/i.test(l.blog.replace(/^https?:\/\//i, '')) ? 'https://' + l.blog.replace(/^https?:\/\//i, '') : null;
+
+    $('detail').replaceChildren(
+      h('h2', {}, l.name),
+      h('div', { class: 'meta' },
+        h('a', { href: 'mailto:' + encodeURIComponent(l.email) }, l.email),
+        h('span', {}, fmtDate(l.created_at)),
+        h('span', {}, 'Пакет: ' + (l.plan || '—')),
+        l.blog ? (blogUrl ? h('a', { href: blogUrl, target: '_blank', rel: 'noopener noreferrer' }, l.blog) : h('span', {}, l.blog)) : null),
+      h('div', { class: 'row' }, status, mailBtns('first', 'Ответить на заявку')),
+      hint,
+      field('Чем занимается и кто аудитория', l.about),
+      field('О чём хочет рилсы', l.goal),
+      h('div', { class: 'block' }, h('h3', {}, 'Мои заметки'), notes),
+      h('div', { class: 'block res' },
+        h('h3', {}, 'Готовый результат'),
+        h('div', { class: 'line' }, link,
+          h('button', { class: 'btn', onclick: () => {
+            const v = link.value.trim();
+            if (v && !/^https?:\/\//i.test(v)) return say('Ссылка должна начинаться с https://', 'bad');
+            save({ result_url: v }, 'Ссылка сохранена').then(render);
+          } }, 'Сохранить ссылку'),
+          upBtn, file),
+        l.result_url ? h('div', { class: 'line' }, mailBtns('result', 'Отправить результат клиенту'),
+          h('button', { class: 'btn', onclick: () => save({ status: 'done' }, 'Отмечено как готовое').then(render) }, 'Отметить «Готово»')) : null,
+        h('div', { class: 'hint' }, 'Вставьте ссылку на папку с роликами или загрузите файл (до 50 МБ). Кнопка «Отправить» откроет письмо клиенту с этой ссылкой.')),
+      h('div', { class: 'block' }, h('h3', {}, 'Согласие'), h('p', { class: 'none' }, l.consent || '—')),
+      h('div', { class: 'block' },
+        h('button', { class: 'btn danger', onclick: async () => {
+          if (!confirm('Удалить заявку от «' + l.name + '» навсегда?')) return;
+          try { await api.remove(l.id); currentId = null; await load(); } catch (e) { say('Не удалилось: ' + (e.message || e), 'bad'); }
+        } }, 'Удалить заявку')));
+  };
+
+  const render = () => { renderTabs(); renderList(); renderDetail(); };
+
+  const load = async () => {
+    try { leads = await api.list(); }
+    catch (e) { $('list').replaceChildren(h('div', { class: 'empty' }, 'Не получилось загрузить заявки: ' + (e.message || e))); return; }
+    if (currentId && !leads.some((l) => l.id === currentId)) currentId = null;
+    render();
+  };
+
+  // ---------- вход и запуск ----------
+  const showApp = async () => { $('login').hidden = true; $('app').hidden = false; $('demo').hidden = !DEMO; await load(); };
+
+  $('search').addEventListener('input', (e) => { query = e.target.value.trim().toLowerCase(); renderList(); });
+  $('refresh').addEventListener('click', load);
+  $('logout').addEventListener('click', async () => { if (sb) await sb.auth.signOut(); location.reload(); });
+  $('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = e.target.elements;
+    $('login-err').textContent = '';
+    const { error } = await sb.auth.signInWithPassword({ email: f.email.value.trim(), password: f.password.value });
+    if (error) { $('login-err').textContent = 'Не получилось войти: проверьте почту и пароль.'; return; }
+    showApp();
+  });
+
+  (async () => {
+    if (DEMO) return showApp();
+    if (!sb) { document.body.append(h('div', { class: 'empty' }, 'Не загрузилась библиотека для работы с базой. Проверьте интернет и обновите страницу.')); return; }
+    const { data } = await sb.auth.getSession();
+    if (data.session) showApp(); else $('login').hidden = false;
+  })();
+
+  // новые заявки подтягиваются сами раз в минуту, пока вкладка открыта
+  setInterval(() => { if (!$('app').hidden && !document.hidden && !document.activeElement.matches('textarea, input')) load(); }, 60000);
+</script>
+</body>
+</html>

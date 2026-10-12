@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Личный кабинет — Двойник</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #000; --panel: #0b0b0c; --panel-2: #141415; --line: rgba(255,255,255,.1);
+    --text: #f4f4f2; --muted: #8b8b8b; --ghost: #2a2a2b; --accent: #2f6bff;
+    --ok: #3fb46b; --warn: #e0a52b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: "Inter Tight", system-ui, sans-serif; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+  button, textarea, input { font: inherit; color: inherit; }
+  [hidden] { display: none !important; }
+  .page { max-width: 1120px; margin: 0 auto; padding: 0 24px 96px; }
+
+  .demo { background: rgba(224,165,43,.12); border-bottom: 1px solid rgba(224,165,43,.3); color: #f0c466; padding: 10px 24px; font-size: 14px; text-align: center; }
+  .top { display: flex; align-items: center; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .logo { font-size: 18px; font-weight: 500; letter-spacing: -.02em; display: flex; align-items: center; gap: 8px; }
+  .logo i { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); }
+  .top .sp { flex: 1; }
+  .who { font-size: 14px; color: var(--muted); }
+  .badge { border: 1px solid rgba(47,107,255,.5); color: #9dbbff; border-radius: 100px; padding: 5px 12px; font-size: 12px; }
+
+  .btn { color: var(--text); background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 10px 16px; font-size: 14px; cursor: pointer; transition: .2s; text-decoration: none; display: inline-block; }
+  .btn:hover { border-color: #666; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); }
+  .btn.primary:hover { filter: brightness(1.15); }
+  .btn.small { padding: 7px 12px; font-size: 13px; }
+
+  .hello { padding: 56px 0 40px; }
+  .hello h1 { font-size: clamp(38px, 6vw, 76px); font-weight: 400; line-height: .95; letter-spacing: -.05em; }
+  .hello h1 em { font-style: normal; color: var(--ghost); }
+  .hello p { color: var(--muted); margin-top: 16px; max-width: 520px; }
+
+  /* этапы */
+  .stages { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 64px; }
+  .stage { border: 1px solid var(--line); border-radius: 14px; padding: 20px; background: linear-gradient(160deg, #101011, #050505 60%); }
+  .stage .n { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .stage .n i { width: 8px; height: 8px; border-radius: 50%; background: #3a3a3a; }
+  .stage h3 { font-size: 22px; font-weight: 400; letter-spacing: -.03em; margin: 26px 0 6px; }
+  .stage p { font-size: 14px; color: var(--muted); }
+  .stage.done .n i { background: var(--ok); } .stage.done .n { color: var(--ok); }
+  .stage.now { border-color: rgba(47,107,255,.5); background: linear-gradient(160deg, #080f1f, #050505 60%); }
+  .stage.now .n i { background: var(--accent); box-shadow: 0 0 10px var(--accent); } .stage.now .n { color: #9dbbff; }
+
+  section { padding: 48px 0; border-top: 1px solid var(--line); }
+  .sh { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; margin-bottom: 28px; }
+  .sh h2 { font-size: clamp(26px, 3.4vw, 40px); font-weight: 400; letter-spacing: -.04em; line-height: 1; }
+  .sh p { color: var(--muted); font-size: 14px; max-width: 360px; text-align: right; }
+
+  /* загрузка видео */
+  .up { display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; }
+  .drop { border: 1px dashed #3a3a3a; border-radius: 14px; padding: 40px 24px; text-align: center; cursor: pointer; transition: .2s; display: grid; place-content: center; gap: 10px; min-height: 240px; }
+  .drop:hover, .drop.over { border-color: var(--accent); background: rgba(47,107,255,.06); }
+  .drop strong { font-size: 20px; font-weight: 400; letter-spacing: -.02em; }
+  .drop span { font-size: 14px; color: var(--muted); }
+  .bar { height: 6px; border-radius: 6px; background: #1d1d1e; overflow: hidden; margin-top: 8px; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+  .tips { border: 1px solid var(--line); border-radius: 14px; padding: 24px; background: var(--panel); }
+  .tips h3 { font-size: 16px; font-weight: 500; margin-bottom: 14px; }
+  .tips li { list-style: none; font-size: 14.5px; color: #d6d6d6; padding: 7px 0 7px 26px; position: relative; }
+  .tips li::before { content: ""; position: absolute; left: 0; top: 13px; width: 12px; height: 1px; background: var(--accent); }
+  .file { display: flex; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin-top: 12px; font-size: 14px; }
+  .file .ok { color: var(--ok); margin-left: auto; white-space: nowrap; }
+
+  /* ролики */
+  .reels { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .reel { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--panel); display: flex; flex-direction: column; }
+  .cover { aspect-ratio: 9 / 16; position: relative; display: grid; place-items: center; background: radial-gradient(circle at 50% 35%, #1b2a4d, #07080c 70%); }
+  .cover::after { content: ""; width: 54px; height: 54px; border-radius: 50%; border: 1px solid rgba(255,255,255,.35); background: rgba(0,0,0,.35) no-repeat 55% 50% / 16px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 12'%3E%3Cpath d='M0 0l10 6-10 6z' fill='white'/%3E%3C/svg%3E"); }
+  .cover .tag { position: absolute; left: 10px; top: 10px; font-size: 11px; padding: 4px 9px; border-radius: 100px; background: var(--accent); }
+  .cover .tag.ok { background: rgba(63,180,107,.2); color: #7fdba3; border: 1px solid rgba(63,180,107,.4); }
+  .cover .tag.fix { background: rgba(224,165,43,.18); color: #f0c466; border: 1px solid rgba(224,165,43,.4); }
+  .cover .len { position: absolute; right: 10px; bottom: 10px; font-size: 12px; color: #ddd; }
+  .reel .in { padding: 14px; display: grid; gap: 10px; flex: 1; }
+  .reel h4 { font-size: 15px; font-weight: 500; line-height: 1.25; }
+  .reel .dt { font-size: 12px; color: var(--muted); }
+  .reel .acts { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
+  .reel textarea { width: 100%; background: #000; border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font-size: 13px; resize: vertical; min-height: 60px; }
+
+  /* контент-план */
+  .plan-row { display: grid; grid-template-columns: 70px 1fr auto; gap: 16px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .plan-row .d { font-size: 13px; color: var(--muted); }
+  .plan-row .t { font-size: 17px; letter-spacing: -.02em; }
+  .st { font-size: 12px; padding: 4px 10px; border-radius: 100px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+  .st.ok { color: #7fdba3; border-color: rgba(63,180,107,.4); }
+  .st.now { color: #9dbbff; border-color: rgba(47,107,255,.5); }
+
+  /* низ */
+  .two { display: grid; grid-template-columns: 1.3fr 1fr; gap: 12px; }
+  .card { border: 1px solid var(--line); border-radius: 14px; padding: 24px; background: var(--panel); }
+  .card h3 { font-size: 16px; font-weight: 500; margin-bottom: 16px; }
+  .msgs { display: grid; gap: 10px; max-height: 280px; overflow-y: auto; margin-bottom: 14px; }
+  .msg { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 14.5px; background: var(--panel-2); }
+  .msg small { display: block; font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .msg.me { margin-left: auto; background: rgba(47,107,255,.18); }
+  .send { display: flex; gap: 8px; }
+  .send input { flex: 1; background: #000; border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; font-size: 14px; }
+  .send input:focus { outline: none; border-color: var(--accent); }
+  .kv { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+  .kv span:first-child { color: var(--muted); }
+  .quota { margin: 18px 0; }
+  .quota .bar i { width: 40%; }
+  .quota small { font-size: 13px; color: var(--muted); }
+
+  @media (max-width: 820px) {
+    .stages, .up, .two { grid-template-columns: 1fr; }
+    .sh p { text-align: left; }
+    .plan-row { grid-template-columns: 54px 1fr; }
+    .plan-row .st { grid-column: 2; justify-self: start; }
+    .page { padding: 0 16px 72px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="demo">Это макет кабинета клиента: данные выдуманные, кнопки работают «понарошку» — ничего никуда не отправляется.</div>
+
+<div class="page">
+  <header class="top">
+    <div class="logo"><i></i>двойник</div>
+    <div class="sp"></div>
+    <span class="badge">Пакет «Про» · активен до 12 ноября</span>
+    <span class="who">alina@example.com</span>
+    <button class="btn small">Выйти</button>
+  </header>
+
+  <div class="hello">
+    <h1>Алина, здравствуйте. <em>Ваш двойник уже работает.</em></h1>
+    <p>Здесь всё, что касается вашего аватара: видео для него, готовые ролики, контент-план и переписка со мной.</p>
+  </div>
+
+  <div class="stages">
+    <div class="stage done"><div class="n"><i></i>Шаг 1 · готово</div><h3>Ваше видео</h3><p>Получено 2 октября, подходит для аватара.</p></div>
+    <div class="stage done"><div class="n"><i></i>Шаг 2 · готово</div><h3>Аватар собран</h3><p>Два образа: «Кабинет» и «Домашний».</p></div>
+    <div class="stage now"><div class="n"><i></i>Шаг 3 · идёт сейчас</div><h3>Ролики выходят</h3><p>6 из 15 готовы, следующие два — в четверг.</p></div>
+  </div>
+
+  <section>
+    <div class="sh">
+      <h2>Готовые ролики</h2>
+      <p>Посмотрите, скачайте и опубликуйте. Если что-то не так — нажмите «Нужны правки» и напишите, что поменять.</p>
+    </div>
+    <div class="reels" id="reels"></div>
+  </section>
+
+  <section>
+    <div class="sh">
+      <h2>Видео для аватара</h2>
+      <p>Нужно один раз. Если захотите новый образ — другая одежда или фон — загрузите ещё одно.</p>
+    </div>
+    <div class="up">
+      <div>
+        <div class="drop" id="drop" tabindex="0" role="button" aria-label="Загрузить видео">
+          <strong>Перетащите видео сюда</strong>
+          <span>или нажмите, чтобы выбрать файл · MP4 или MOV, до 2 ГБ</span>
+          <div class="bar" id="up-bar" hidden><i></i></div>
+        </div>
+        <input type="file" id="pick" accept="video/*" hidden>
+        <div id="files">
+          <div class="file"><span>кабинет_дубль2.mp4 · 2 мин 40 с</span><span class="ok">✓ принято 2 октября</span></div>
+          <div class="file"><span>дома_у_окна.mov · 3 мин 05 с</span><span class="ok">✓ принято 4 октября</span></div>
+        </div>
+      </div>
+      <div class="tips">
+        <h3>Как снять, чтобы аватар получился живым</h3>
+        <ul>
+          <li>Телефон вертикально, на уровне глаз, на штативе или опоре</li>
+          <li>Ровный свет в лицо, без окна за спиной</li>
+          <li>Тихая комната, без музыки и эха</li>
+          <li>2–3 минуты говорите в камеру как обычно, на любую тему</li>
+          <li>Руки ниже лица, без резких поворотов головы</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sh">
+      <h2>Контент-план на октябрь</h2>
+      <p>Темы можно менять местами или заменять — напишите мне в сообщениях ниже.</p>
+    </div>
+    <div id="plan"></div>
+  </section>
+
+  <section>
+    <div class="two">
+      <div class="card">
+        <h3>Сообщения</h3>
+        <div class="msgs" id="msgs">
+          <div class="msg">Алина, первые шесть роликов готовы — посмотрите, пожалуйста. В третьем я чуть сократила вступление.<small>вчера, 18:20</small></div>
+          <div class="msg me">Супер, спасибо! В ролике про SPF хочется другой заголовок, написала в правках.<small>вчера, 21:05</small></div>
+          <div class="msg">Вижу, поправлю до завтра.<small>сегодня, 09:40</small></div>
+        </div>
+        <form class="send" id="send">
+          <input type="text" placeholder="Напишите сообщение" maxlength="1000" aria-label="Сообщение">
+          <button class="btn primary" type="submit">Отправить</button>
+        </form>
+      </div>
+      <div class="card">
+        <h3>Подписка</h3>
+        <div class="kv"><span>Пакет</span><span>Про — $1000 в месяц</span></div>
+        <div class="kv"><span>Следующая оплата</span><span>12 ноября</span></div>
+        <div class="quota">
+          <small>Ролики в этом месяце: 6 из 15</small>
+          <div class="bar"><i></i></div>
+        </div>
+        <button class="btn">Сменить пакет</button>
+        <button class="btn">Чеки и оплаты</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  // Макет: все данные ниже выдуманные и живут только в памяти страницы.
+  const reels = [
+    { title: 'Три ошибки в уходе после 30', date: '10 октября', len: '0:42', state: 'new' },
+    { title: 'SPF зимой — нужен или нет', date: '10 октября', len: '0:38', state: 'fix', note: 'Хочется другой заголовок' },
+    { title: 'Как выбрать крем за две минуты', date: '8 октября', len: '0:51', state: 'ok' },
+    { title: 'Что я не советую клиенткам', date: '8 октября', len: '0:47', state: 'ok' },
+    { title: 'Чистка лица: мифы', date: '6 октября', len: '0:35', state: 'ok' },
+    { title: 'Знакомство: кто я и чем помогаю', date: '6 октября', len: '0:29', state: 'ok' }
+  ];
+  const TAG = { new: ['Новый', ''], ok: ['Принят', 'ok'], fix: ['На правках', 'fix'] };
+
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+  const renderReels = () => {
+    const box = document.getElementById('reels');
+    box.replaceChildren(...reels.map((r) => {
+      const card = el('article', 'reel');
+      const cover = el('div', 'cover');
+      cover.append(el('span', 'tag ' + TAG[r.state][1], TAG[r.state][0]), el('span', 'len', r.len));
+      const body = el('div', 'in');
+      body.append(el('h4', '', r.title), el('span', 'dt', r.date));
+      if (r.state === 'fix' && r.note) body.append(el('span', 'dt', 'Ваш комментарий: ' + r.note));
+
+      const acts = el('div', 'acts');
+      const dl = el('button', 'btn small', 'Скачать');
+      acts.append(dl);
+      if (r.state === 'new') {
+        const ok = el('button', 'btn small primary', 'Всё отлично');
+        ok.onclick = () => { r.state = 'ok'; renderReels(); };
+        const fix = el('button', 'btn small', 'Нужны правки');
+        fix.onclick = () => {
+          const ta = el('textarea'); ta.placeholder = 'Что поменять?'; ta.maxLength = 500;
+          const send = el('button', 'btn small primary', 'Отправить правки');
+          send.onclick = () => { if (!ta.value.trim()) return ta.focus(); r.state = 'fix'; r.note = ta.value.trim(); renderReels(); };
+          acts.replaceChildren(ta, send); ta.focus();
+        };
+        acts.append(ok, fix);
+      }
+      body.append(acts);
+      card.append(cover, body);
+      return card;
+    }));
+  };
+  renderReels();
+
+  const plan = [
+    ['6 окт', 'Знакомство: кто я и чем помогаю', 'ok', 'Вышел'],
+    ['8 окт', 'Что я не советую клиенткам', 'ok', 'Вышел'],
+    ['10 окт', 'Три ошибки в уходе после 30', 'ok', 'Готов'],
+    ['14 окт', 'Домашний уход за 10 минут', 'now', 'В работе'],
+    ['16 окт', 'Ретинол: с чего начать', 'now', 'В работе'],
+    ['20 окт', 'Разбор косметички подписчицы', '', 'Запланирован'],
+    ['22 окт', 'Почему дорогой крем не работает', '', 'Запланирован']
+  ];
+  document.getElementById('plan').replaceChildren(...plan.map(([d, t, cls, label]) => {
+    const row = el('div', 'plan-row');
+    row.append(el('span', 'd', d), el('span', 't', t), el('span', 'st ' + cls, label));
+    return row;
+  }));
+
+  // загрузка видео «понарошку»: полоска доходит до конца, файл никуда не уходит
+  const drop = document.getElementById('drop'), pick = document.getElementById('pick'), bar = document.getElementById('up-bar');
+  const fakeUpload = (file) => {
+    if (!file) return;
+    bar.hidden = false; let p = 0;
+    const t = setInterval(() => {
+      p = Math.min(100, p + 8); bar.firstElementChild.style.width = p + '%';
+      if (p < 100) return;
+      clearInterval(t); bar.hidden = true; bar.firstElementChild.style.width = '0';
+      const row = el('div', 'file');
+      row.append(el('span', '', file.name), el('span', 'ok', '✓ загружено, проверяю'));
+      document.getElementById('files').append(row);
+    }, 120);
+  };
+  drop.addEventListener('click', () => pick.click());
+  drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick.click(); } });
+  pick.addEventListener('change', () => { fakeUpload(pick.files[0]); pick.value = ''; });
+  drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('over'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+  drop.addEventListener('drop', (e) => { e.preventDefault(); drop.classList.remove('over'); fakeUpload(e.dataTransfer.files[0]); });
+
+  document.getElementById('send').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = e.target.querySelector('input'); const text = input.value.trim();
+    if (!text) return;
+    const m = el('div', 'msg me', text); m.append(el('small', '', 'только что'));
+    const box = document.getElementById('msgs'); box.append(m); box.scrollTop = box.scrollHeight;
+    input.value = '';
+  });
+</script>
+</body>
+</html>
